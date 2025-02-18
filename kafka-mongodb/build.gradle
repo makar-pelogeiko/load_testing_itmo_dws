@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    //id 'com.github.johnrengelman.shadow' version '8.1.0' //  Плагин для создания fat JAR
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.kafka:kafka-clients:3.5.1'
+    implementation 'org.mongodb:mongodb-driver-sync:4.10.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+jar {
+    manifest {
+        attributes(
+                //'Main-Class': 'ru.pelogeiko.KafkaToMongoApp'
+                'Main-Class': 'MainKafkaMongo'
+        )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+//shadowJar {
+//    archiveBaseName.set('kafka-mongodb')  // Используем archiveBaseName вместо baseName
+//    archiveVersion.set('1.0-SNAPSHOT')    // Устанавливаем версию JAR
+//    archiveClassifier.set('')             // Не добавляем классификатор (например, '-all' или '-fat')
+//}
+
+//build {
+//    dependsOn shadowJar  // shadowJar выполняется при сборке
+//}
+
+test {
+    useJUnitPlatform()
+}

@@ -1,0 +1,84 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.2'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.fms'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+//	mavenCentral {
+//		content {
+//			// Применяем настройку только к зависимостям org.apache.jmeter
+//			includeGroup "org.apache.jmeter"
+//            includeGroup "us.abstracta.jmeter"
+//		}
+//		// Настраиваем источники метаданных
+//		metadataSources {
+//			mavenPom() // Используем только POM-файлы
+//			artifact() // Загружаем артефакты
+//			ignoreGradleMetadataRedirection() // Игнорируем перенаправление метаданных Gradle
+//		}
+//	}
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// JMeter Java DSL для написания нагрузочных тестов
+	implementation ('us.abstracta.jmeter:jmeter-java-dsl:1.29.1') {
+		exclude group: 'org.apache.jmeter',  module: 'bom'
+	}
+
+	// JavaFaker для генерации фейковых данных
+	//implementation 'com.github.javafaker:javafaker:1.0.2'
+	implementation('com.github.javafaker:javafaker:1.0.2') {
+		exclude group: 'org.yaml', module: 'snakeyaml'
+	}
+	implementation 'org.yaml:snakeyaml:2.3'
+
+	// JMeter Java DSL Dashboard для генерации отчетов
+	implementation ('us.abstracta.jmeter:jmeter-java-dsl-dashboard:1.29.1'){
+		exclude group: 'org.apache.jmeter',  module: 'bom'
+	}
+
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+jar {
+	manifest {
+		attributes(
+				'Main-Class': 'com.fms.app_web.AppWebApplication'
+		)
+	}
+
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
